@@ -16,6 +16,14 @@ func (c *Controller) PostImageFromClient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if c.Passphrase != "" {
+		p := r.Header.Get("X-Gyazo-Auth")
+		if c.Passphrase != p {
+			http.Error(w, "Forbidden", 403)
+			return
+		}
+	}
+
 	fi, _, err := r.FormFile("imagedata")
 	if err != nil {
 		http.Error(w, "Cannot load imagedata", 400)
