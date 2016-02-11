@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/moznion/gyazo-server/service"
@@ -28,7 +29,9 @@ func (c *Controller) PostImageFromClient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	fmt.Fprintf(w, url)
+	ps := strings.Split(url, "/")
+
+	fmt.Fprintf(w, strings.Join([]string{c.Host, ps[len(ps)-1]}, "/"))
 }
 
 func (c *Controller) GetImage(w http.ResponseWriter, r *http.Request) {

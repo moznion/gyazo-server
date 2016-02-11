@@ -18,6 +18,7 @@ type opts struct {
 	Port       int    `short:"p" long:"port" default:"9090" description:"Port number for listening"`
 	BucketName string `short:"b" long:"bucket" required:"true" description:"Bucket name for AWS"`
 	Region     string `short:"r" long:"region" required:"true" description:"Region name for AWS"`
+	Host       string `short:"h" long:"host" default:"http://localhost:9090" description:"Host name"`
 }
 
 func parseArgs(args []string) (opt *opts) {
@@ -34,7 +35,7 @@ func parseArgs(args []string) (opt *opts) {
 func Run(args []string) {
 	o := parseArgs(args)
 
-	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName))
+	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName), o.Host)
 
 	routes := map[string]func(http.ResponseWriter, *http.Request){
 		"/{key}":     c.GetImage,            // GET

@@ -5,11 +5,13 @@ import (
 )
 
 type Controller struct {
-	S3 *aws.S3Info
+	S3   *aws.S3Info
+	Host string
 }
 
-func NewController(s3 *aws.S3Info) *Controller {
+func NewController(s3 *aws.S3Info, host string) *Controller {
 	return &Controller{
-		S3: s3,
+		S3:   s3,
+		Host: host,
 	}
 }
