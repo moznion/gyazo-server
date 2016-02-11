@@ -34,5 +34,5 @@ func UploadImageForApp(fi multipart.File, s3 *aws.S3Info) (string, error) {
 		}
 	}
 
-	return s3.Upload(fo, calcChecksum(fo))
+	return s3.Upload(fo, calcChecksum(fo)+".png", "image/png")
 }

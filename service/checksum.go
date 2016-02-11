@@ -2,7 +2,7 @@ package service
 
 import (
 	"crypto/sha256"
-	"encoding/base64"
+	"fmt"
 	"io"
 	"math"
 	"os"
@@ -26,5 +26,5 @@ func calcChecksum(f *os.File) string {
 		io.WriteString(hash, string(buf)) // append into the hash
 	}
 
-	return base64.URLEncoding.EncodeToString(hash.Sum(nil))
+	return fmt.Sprintf("%x", hash.Sum(nil))
 }

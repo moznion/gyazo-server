@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/moznion/gyazo-server/service"
 )
 
@@ -16,22 +17,38 @@ func (c *Controller) PostImageFromClient(w http.ResponseWriter, r *http.Request)
 
 	fi, _, err := r.FormFile("imagedata")
 	if err != nil {
-		c.renderErrorResponse(w, "Cannot load imagedata", 400)
+		http.Error(w, "Cannot load imagedata", 400)
 		return
 	}
 	defer fi.Close()
 
 	url, err := service.UploadImageForApp(fi, c.S3)
 	if err != nil {
-		c.renderErrorResponse(w, "Internal server error", 500)
+		http.Error(w, "Internal server error", 500)
 		return
 	}
 
-	c.renderUploadedResponse(w, url)
+	fmt.Fprintf(w, url)
 }
 
-func (c *Controller) renderUploadedResponse(w http.ResponseWriter, url string) {
-	m := map[string]string{"message": "Secceeded", "url": url}
-	s, _ := json.Marshal(m)
-	fmt.Fprintf(w, string(s))
+func (c *Controller) GetImage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Invalid request method", 405)
+		return
+	}
+
+	vs := mux.Vars(r)
+	key := vs["key"]
+
+	o, err := c.S3.Get(key)
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	w.Header().Set("Content-Type", *o.ContentType)
+	w.WriteHeader(http.StatusOK)
+
+	b, _ := ioutil.ReadAll(o.Body)
+	w.Write(b)
 }

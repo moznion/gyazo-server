@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
 	"github.com/moznion/gyazo-server/aws"
 	"github.com/moznion/gyazo-server/controller"
@@ -37,16 +37,17 @@ func Run(args []string) {
 	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName))
 
 	routes := map[string]func(http.ResponseWriter, *http.Request){
+		"/{key}":     c.GetImage,            // GET
 		"/app/image": c.PostImageFromClient, // POST
 	}
 
-	s := http.NewServeMux()
+	r := mux.NewRouter()
 	for p, h := range routes {
-		s.Handle(p, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(h)))
+		r.HandleFunc(p, h)
 	}
 
 	log.Printf("Listen - 127.0.0.1:%d", o.Port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", o.Port), handlers.CompressHandler(s))
+	err := http.ListenAndServe(fmt.Sprintf(":%d", o.Port), r)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
