@@ -8,28 +8,36 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/jessevdk/go-flags"
-	"github.com/moznion/gyazo-server/service"
+	"github.com/moznion/gyazo-server/aws"
+	"github.com/moznion/gyazo-server/controller"
 )
 
 const version = "0.0.1"
 
 type opts struct {
-	Port int `short:"p" long:"port" default:"9090" description:"Port number for listening"`
+	Port       int    `short:"p" long:"port" default:"9090" description:"Port number for listening"`
+	BucketName string `short:"b" long:"bucket" required:"true" description:"Bucket name for AWS"`
+	Region     string `short:"r" long:"region" required:"true" description:"Region name for AWS"`
 }
 
 func parseArgs(args []string) (opt *opts) {
 	o := &opts{}
 	p := flags.NewParser(o, flags.Default)
 	p.Usage = fmt.Sprintf("\n\nVerion:\n  %s", version)
-	p.ParseArgs(args)
+	_, err := p.ParseArgs(args)
+	if err != nil {
+		os.Exit(1)
+	}
 	return o
 }
 
 func Run(args []string) {
 	o := parseArgs(args)
 
+	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName))
+
 	routes := map[string]func(http.ResponseWriter, *http.Request){
-		"/app/image": service.PostImageFromClient, // POST
+		"/app/image": c.PostImageFromClient, // POST
 	}
 
 	s := http.NewServeMux()

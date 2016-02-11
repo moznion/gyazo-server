@@ -1,30 +1,18 @@
 package service
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"mime/multipart"
 	"os"
+
+	"github.com/moznion/gyazo-server/aws"
 )
 
-func PostImageFromClient(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Invalid request method", 405)
-		return
-	}
-
-	fi, _, err := r.FormFile("imagedata")
-	if err != nil {
-		http.Error(w, "Cannot load imagedata", 400)
-		return
-	}
-	defer fi.Close()
-
+func UploadImageForApp(fi multipart.File, s3 *aws.S3Info) (string, error) {
 	fo, err := ioutil.TempFile("", "gyazo")
 	if err != nil {
-		http.Error(w, "Internal server error", 500)
-		return
+		return "", err
 	}
 	defer fo.Close()
 	defer os.Remove(fo.Name())
@@ -33,8 +21,7 @@ func PostImageFromClient(w http.ResponseWriter, r *http.Request) {
 	for {
 		n, err := fi.Read(buf)
 		if err != nil && err != io.EOF {
-			http.Error(w, "Internal server error", 500)
-			return
+			return "", err
 		}
 
 		if n == 0 {
@@ -43,10 +30,9 @@ func PostImageFromClient(w http.ResponseWriter, r *http.Request) {
 
 		_, err = fo.Write(buf[:n])
 		if err != nil {
-			http.Error(w, "Internal server error", 500)
-			return
+			return "", err
 		}
 	}
 
-	fmt.Fprintf(w, "Succeeded")
+	return s3.Upload(fo, calcChecksum(fo))
 }
