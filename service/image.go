@@ -17,7 +17,7 @@ func UploadImageForApp(fi multipart.File, s3 *aws.S3Info) (string, error) {
 	defer fo.Close()
 	defer os.Remove(fo.Name())
 
-	err = io.Copy(fo, fi)
+	_, err = io.Copy(fo, fi)
 	if err != nil {
 		return "", err
 	}
