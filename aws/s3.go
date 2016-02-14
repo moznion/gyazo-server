@@ -17,10 +17,11 @@ type S3Info struct {
 	conf       *aws.Config
 }
 
-func NewS3Info(region, bucketName string) *S3Info {
+func NewS3Info(region, bucketName, s3Host string) *S3Info {
 	conf := &aws.Config{
 		Credentials: credentials.NewEnvCredentials(),
 		Region:      aws.String(region),
+		Endpoint:    aws.String(s3Host),
 	}
 
 	return &S3Info{

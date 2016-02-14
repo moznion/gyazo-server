@@ -20,6 +20,7 @@ type opts struct {
 	Region     string `short:"r" long:"region" required:"true" description:"Region name for AWS"`
 	Host       string `short:"h" long:"host" default:"http://localhost:9090" description:"Host name"`
 	Passphrase string `short:"P" long:"passphrase" default:"" description:"Passphrase for upload"`
+	S3Host     string `long:"s3-host" default:"" description:"Optional endpoint URL for S3"`
 }
 
 func parseArgs(args []string) (opt *opts) {
@@ -36,7 +37,7 @@ func parseArgs(args []string) (opt *opts) {
 func Run(args []string) {
 	o := parseArgs(args)
 
-	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName), o.Host, o.Passphrase)
+	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName, o.S3Host), o.Host, o.Passphrase)
 
 	routes := map[string]func(http.ResponseWriter, *http.Request){
 		"/{key}":     c.GetImage,            // GET
