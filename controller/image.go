@@ -10,18 +10,15 @@ import (
 	"github.com/moznion/gyazo-server/service"
 )
 
-func (c *Controller) PostImageFromClient(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+func (c *Controller) PostImage(w http.ResponseWriter, r *http.Request) {
+	if c.isPost(r) {
 		http.Error(w, "Invalid request method", 405)
 		return
 	}
 
-	if c.Passphrase != "" {
-		p := r.Header.Get("X-Gyazo-Auth")
-		if c.Passphrase != p {
-			http.Error(w, "Forbidden", 403)
-			return
-		}
+	if !c.authenticate(r) {
+		http.Error(w, "Forbidden", 403)
+		return
 	}
 
 	fi, _, err := r.FormFile("imagedata")
@@ -31,7 +28,7 @@ func (c *Controller) PostImageFromClient(w http.ResponseWriter, r *http.Request)
 	}
 	defer fi.Close()
 
-	url, err := service.UploadImageForApp(fi, c.S3)
+	url, err := service.UploadImage(fi, c.S3)
 	if err != nil {
 		http.Error(w, "Internal server error", 500)
 		return

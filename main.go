@@ -40,8 +40,8 @@ func Run(args []string) {
 	c := controller.NewController(aws.NewS3Info(o.Region, o.BucketName, o.S3Host), o.Host, o.Passphrase)
 
 	routes := map[string]func(http.ResponseWriter, *http.Request){
-		"/{key}":     c.GetImage,            // GET
-		"/app/image": c.PostImageFromClient, // POST
+		"/app/image": c.PostImage, // POST
+		"/{key}":     c.GetImage,  // GET
 	}
 
 	r := mux.NewRouter()

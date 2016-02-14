@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/moznion/gyazo-server/aws"
 )
 
@@ -16,4 +18,18 @@ func NewController(s3 *aws.S3Info, host, passphrase string) *Controller {
 		Host:       host,
 		Passphrase: passphrase,
 	}
+}
+
+func (c *Controller) authenticate(r *http.Request) bool {
+	if c.Passphrase == "" || c.Passphrase == r.Header.Get("X-Gyazo-Auth") {
+		return true
+	}
+	return false
+}
+
+func (c *Controller) isPost(r *http.Request) bool {
+	if r.Method == "POST" {
+		return true
+	}
+	return false
 }
