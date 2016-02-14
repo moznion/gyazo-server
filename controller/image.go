@@ -40,7 +40,7 @@ func (c *Controller) PostImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Controller) GetImage(w http.ResponseWriter, r *http.Request) {
-	if !c.isGet(c) {
+	if !c.isGet(r) {
 		http.Error(w, "Invalid request method", 405)
 		return
 	}
