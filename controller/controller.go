@@ -33,3 +33,10 @@ func (c *Controller) isPost(r *http.Request) bool {
 	}
 	return false
 }
+
+func (c *Controller) isGet(r *http.Request) bool {
+	if r.Method == "GET" {
+		return true
+	}
+	return false
+}
